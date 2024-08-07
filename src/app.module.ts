@@ -1,13 +1,23 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AdminModule } from './module/admin/admin.module';
-import { AdminModule } from './module/admin/admin/admin.module';
-import { CustomerModule } from './module/customer/customer.module';
-import { AdminModule } from './module/admin/admin.module';
-
+import { UserModule } from './auth/user/user.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import config from './core/config';
 @Module({
-  imports: [AdminModule, CustomerModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: () => config.database,
+      inject: [ConfigService],
+    }),
+    TypeOrmModule.forFeature([UserModule]),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
